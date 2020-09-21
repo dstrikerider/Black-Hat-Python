@@ -78,12 +78,10 @@ try:
 	while True:
 		raw_buffer = sniffer.recvfrom(65535)[0]
 		ip_header = IP(raw_buffer[:20])
-		#print("Protocol: %s %s -> %s" % (ip_header.protocol,ip_header.src_address,ip_header.dst_address))				
 		if ip_header.protocol == "ICMP":
 			offset = ip_header.ihl * 4
 			buf = raw_buffer[offset:offset + sizeof(ICMP)]
 			icmp_header = ICMP(buf)
-			#print("ICMP -> Type: %d Code: %d" % (icmp_header.type,icmp_header.code))
 			if icmp_header.code == 3 and icmp_header.type == 3:
 				if ip_address(ip_header.src_address) in ip_network(tgt_subnet):
 					if raw_buffer[len(raw_buffer)-len(tgt_message):] == tgt_message.encode():
