@@ -6,17 +6,20 @@ from ipaddress import ip_address
 from ipaddress import ip_network
 from ctypes import *
 
-tgt_ip = input("Enter Destination IP: ")
+
 host = input("Enter Host IP: ")
+tgt_ip = input("Enter Destination IP: ")
 count = 0
 tgt_subnet = tgt_ip + "/24"
 tgt_message = "PYTHONRULES!"
+
 
 def udp_sender(sub_net, magic_message):
 	sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	for ip in ip_network(sub_net).hosts():
 		sender.sendto(magic_message.encode('utf-8'), (str(ip), 65212))
 
+		
 class IP(Structure):
 	_fields_ = [
 		("ihl", c_ubyte, 4),
@@ -46,6 +49,7 @@ class IP(Structure):
 		except IndexError:
 			self.protocol = str(self.protocol_num)
 
+			
 class ICMP(Structure):
 	_fields_ = [
 		("type", c_ubyte),
@@ -61,6 +65,7 @@ class ICMP(Structure):
 	def __init__(self, socket_buffer):
 		self.socket_buffer = socket_buffer
 
+		
 if os.name == "nt":
 	socket_protocol = socket.IPPROTO_IP
 else:
@@ -69,6 +74,7 @@ else:
 sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
 sniffer.bind((host, 0))
 sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+
 if os.name == "nt":
 	sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
 	
@@ -85,7 +91,7 @@ try:
 			if icmp_header.code == 3 and icmp_header.type == 3:
 				if ip_address(ip_header.src_address) in ip_network(tgt_subnet):
 					if raw_buffer[len(raw_buffer)-len(tgt_message):] == tgt_message.encode():
-						print("\n\t[+] Host Up: %s" % ip_header.src_address)
+						print("\n[+] Host Up: %s" % ip_header.src_address)
 except KeyboardInterrupt:
 	if os.name == "nt":
 		sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
